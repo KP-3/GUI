@@ -3,8 +3,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.ArrayList;
 
 public class QandAGUI extends JFrame implements ActionListener{
+    ArrayList<String> rulelist = new ArrayList<String>();
+    ArrayList<String> aslist = new ArrayList<String>();
     JLabel aslabel = new JLabel("Assertion-filename");
     JTextArea as = new JTextArea(30,20);
     JButton assave = new JButton("save");
@@ -32,7 +35,7 @@ public class QandAGUI extends JFrame implements ActionListener{
 
 
         GridBagLayout layout = new GridBagLayout();
-        setSize(600,700);
+        setSize(800,900);
         getContentPane().setLayout(layout);
         GridBagConstraints gbc1 = new GridBagConstraints();
         gbc1.gridx = 0;
@@ -54,7 +57,7 @@ public class QandAGUI extends JFrame implements ActionListener{
         JPanel P4 = new JPanel();
         //P4.setBackground(Color.GREEN);
         gbc1.gridy=2;
-        gbc1.weighty=40;
+        gbc1.weighty=60;
         layout.setConstraints(P4,gbc1);
         add(P4);
 
@@ -79,9 +82,11 @@ public class QandAGUI extends JFrame implements ActionListener{
         gbc4.gridy = 2;
         gbc4.gridwidth = 1;
         layout.setConstraints(assave,gbc4);
+        assave.addActionListener(this);
         P5.add(assave);
         gbc4.gridx = 2;
         layout.setConstraints(asload,gbc4);
+        asload.addActionListener(this);
         P5.add(asload);
         gbc4.gridx = 0;
         gbc4.gridy = 3;
@@ -167,6 +172,7 @@ public class QandAGUI extends JFrame implements ActionListener{
         dialog.add(error,BorderLayout.NORTH);
         dialog.add(ok,BorderLayout.CENTER);
         dialog.setVisible(false);
+        ok.addActionListener(this);
     }
     public void actionPerformed(ActionEvent event){
         if(event.getSource() == rulesave){
@@ -177,15 +183,91 @@ public class QandAGUI extends JFrame implements ActionListener{
             }else{
                 try{
                     String filename = rulefilename.getText();
-
+                    BufferedWriter in = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename),"UTF-8"));
+                    String[] s = rule.getText().split("\n");
+                    for(String str: s){
+                        rulelist.add(str);
+                    }
+                    for(String str: rulelist){
+                        in.write(str);
+                        in.newLine();
+                    }
+                    in.close();
                 }catch(IOException e){
-
+                    error.setText("Error!!");
+                    dialog.setVisible(true);
                 }
             }
         }else if(event.getSource() == ruleload){
-
+            if(rulefilename.getText().equals("")){
+                error.setText("Please write rulelist-filename");
+                dialog.setVisible(true);
+            }else{
+                try{
+                    String filename = rulefilename.getText();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename),"UTF-8"));
+                    for (String line = in.readLine();line != null;line = in.readLine()){
+                        rulelist.add(line);
+                    }
+                    for(String s: rulelist){
+                        rule.append(s+"\n");
+                    }
+                }catch (IOException e){
+                    error.setText("File is not exist");
+                    dialog.setVisible(true);
+                }
+            }
         }else if(event.getSource() == Go){
-
+                    String rule = rulefilename.getText();
+                    String assertion = asfilename.getText();
+                    String que = query.getText();
+                    ArrayList<String> ans = RuleBaseSystem.question(assertion,rule,que,"memo.txt");
+                    RuleBaseSystem.makegraph();
+                    System.out.println(ans);
+        }else if(event.getSource() == ok){
+            dialog.setVisible(false);
+        }else if(event.getSource() == assave){
+            if(rulefilename.getText().equals("")){
+                error.setText("Please write assertionlist-filename");
+                dialog.setVisible(true);
+            }else{
+                try{
+                    String filename = asfilename.getText();
+                    BufferedWriter in = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename),"UTF-8"));
+                    String[] s1 = as.getText().split("\n");
+                    for(String str: s1){
+                        aslist.add(str);
+                    }
+                    for(String str: aslist){
+                        in.write(str);
+                        in.newLine();
+                    }
+                    in.close();
+                }catch(IOException e){
+                    error.setText("Error!!");
+                    dialog.setVisible(true);
+                }
+            }
+        }else if(event.getSource() == asload){
+            if(asfilename.getText().equals("")){
+                error.setText("Please write assertionlist-filename");
+                dialog.setVisible(true);
+            }else{
+                try{
+                    String filename = asfilename.getText();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename),"UTF-8"));
+                    for (String line = in.readLine();line != null;line = in.readLine()){
+                        aslist.add(line);
+                    }
+                    for(String str: aslist){
+                        System.out.println(str);
+                        as.append(str+"\n");
+                    }
+                }catch (IOException e){
+                    error.setText("File is not exist");
+                    dialog.setVisible(true);
+                }
+            }
         }
     }
 }
