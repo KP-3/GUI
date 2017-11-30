@@ -1,4 +1,5 @@
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +28,9 @@ public class QandAGUI extends JFrame implements ActionListener{
     JButton ok = new JButton("OK");
     JLabel error = new JLabel();
 
+    JLabel Img = new JLabel();
+    JTextArea answer = new JTextArea();
+    JLabel after = new JLabel();
     public static void main(String args[]){
         QandAGUI frame = new QandAGUI();
         frame.setVisible(true);
@@ -35,7 +39,7 @@ public class QandAGUI extends JFrame implements ActionListener{
 
 
         GridBagLayout layout = new GridBagLayout();
-        setSize(800,900);
+        setSize(1000,1000);
         getContentPane().setLayout(layout);
         GridBagConstraints gbc1 = new GridBagConstraints();
         gbc1.gridx = 0;
@@ -55,9 +59,10 @@ public class QandAGUI extends JFrame implements ActionListener{
         layout.setConstraints(P3,gbc1);
         add(P3);
         JPanel P4 = new JPanel();
+        P4.setLayout(new BorderLayout());
         //P4.setBackground(Color.GREEN);
         gbc1.gridy=2;
-        gbc1.weighty=60;
+        gbc1.weighty=70;
         layout.setConstraints(P4,gbc1);
         add(P4);
 
@@ -169,6 +174,15 @@ public class QandAGUI extends JFrame implements ActionListener{
         dialog.setSize(300,100);
         ok.setSize(100,80);
 
+        
+        
+        ScrollPane scr = new ScrollPane();
+        ScrollPane scr2 = new ScrollPane();
+        scr.add(answer);
+        scr2.add(Img);
+        P4.add(after,BorderLayout.NORTH);
+        P4.add(scr2,BorderLayout.CENTER);
+        P4.add(scr, BorderLayout.SOUTH);
         dialog.add(error,BorderLayout.NORTH);
         dialog.add(ok,BorderLayout.CENTER);
         dialog.setVisible(false);
@@ -221,9 +235,17 @@ public class QandAGUI extends JFrame implements ActionListener{
                     String rule = rulefilename.getText();
                     String assertion = asfilename.getText();
                     String que = query.getText();
-                    ArrayList<String> ans = RuleBaseSystem.question(assertion,rule,que,"memo.txt");
+                    String filename = assertion + "-after.txt";
+                    ArrayList<String> ans = RuleBaseSystem.question(assertion,rule,que,filename);
                     RuleBaseSystem.makegraph();
-                    System.out.println(ans);
+                    ImageIcon icon = new ImageIcon("./forward.png");
+                    Image small = icon.getImage().getScaledInstance((int)(icon.getIconWidth()*0.5), (int)(icon.getIconHeight()*0.5), Image.SCALE_SMOOTH);
+                    ImageIcon smallIcon = new ImageIcon(small);
+                    Img.setIcon(smallIcon);
+                    for(String s: ans){
+                    	answer.append(s+"\n");
+                    }
+                    after.setText(filename+"に推論後のワーキングメモリを保存しました。");
         }else if(event.getSource() == ok){
             dialog.setVisible(false);
         }else if(event.getSource() == assave){
