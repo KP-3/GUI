@@ -79,12 +79,13 @@ public class BackwardRuleBaseSystem {
 //            System.out.println(hypothesis);
 //            System.out.println(que);
 //            System.out.println(Integer.toString(mode));
-            backward(wmFileName, rbFileName, hypothesis, que, mode);
+            ArrayList<String> ans = backward(wmFileName, rbFileName, hypothesis, que, mode);
+	    System.out.println(ans);
         }
         makegraph();
     }
 
-    public static void backward(String wmFileName, String rbFileName, String hypothesis, String que, int mode) {
+    public static ArrayList<String> backward(String wmFileName, String rbFileName, String hypothesis, String que, int mode) {
         fm = new FileManager();
         ArrayList<BRule> rules = fm.loadRules(rbFileName);
         //ArrayList rules = fm.loadRules("AnimalWorld.data");
@@ -97,23 +98,37 @@ public class BackwardRuleBaseSystem {
         for (int i = 0; i < st.countTokens(); ) {
             queries.add(st.nextToken());
         }
-        ArrayList<String> theFired = rb.backwardChain(queries); // 後向き推論の実行
+	ArrayList<String> theFired = new ArrayList<String>();
+        try {
+        	theFired = rb.backwardChain(queries); // 後向き推論の実行
+        } catch (Exception e){
+        	System.out.println(e);
+        }
+        boolean success = true;
         if (mode != 1) {
-            que = theFired.get(0).substring(0, theFired.get(0).indexOf(" ")) + que;
+        	try {
+        		que = theFired.get(0).substring(0, theFired.get(0).indexOf(" ")) + que;
+        	} catch (Exception e) {
+        		System.out.println(e);
+        		success = false;
+        	}
         }
         System.out.println();
         System.out.println("Answer");
-        if (mode == 1) {
-            String subject = hypothesis.substring(8); // 主語を取得
-//            System.out.println(subject);
-            for (String s : theFired) {
-                if (!s.substring(s.indexOf(" is ") + 1).equals(hypothesis.substring(hypothesis.indexOf(" is ") + 1))) { // theFiredの末尾にはhypothesisが入っている
-                    if (s.contains(" is ")) { // ~ is ~ という形式のアサーションのみ出力
-                        String ans = subject + s.substring(s.indexOf(" is "));
-                        System.out.println(ans);
-                    }
-                }
-            }
+        ArrayList<String> ansList = new ArrayList<String>();
+	if (success) {
+        	if (mode == 1) {
+        		String subject = hypothesis.substring(8); // 主語を取得
+//            	System.out.println(subject);
+        		for (String s : theFired) {
+        			if (!s.substring(s.indexOf(" is ") + 1).equals(hypothesis.substring(hypothesis.indexOf(" is ") + 1))) { // theFiredの末尾にはhypothesisが入っている
+        				if (s.contains(" is ")) { // ~ is ~ という形式のアサーションのみ出力
+        					String ans = subject + s.substring(s.indexOf(" is "));
+        					System.out.println(ans);
+        					ansList.add(ans);
+        				}
+        			}	
+        		}
 //            if (theFired.contains(que)) {
 //                System.out.println("Exists");
 //            } else {
@@ -131,7 +146,9 @@ public class BackwardRuleBaseSystem {
                     Matcher matObject = patObject.matcher(s);
                     if (matObject.find()) {
 //                        System.out.println("Exists");
-                        System.out.println("Yes, it has.");
+                    	String ans = "Yes, it has.";
+                    	System.out.println(ans);
+                        ansList.add(ans);
                     }
                 }
             }
@@ -147,7 +164,9 @@ public class BackwardRuleBaseSystem {
                     Matcher matObject = patObject.matcher(s);
                     if (matObject.find()) {
 //                        System.out.println("Exists");
-                        System.out.println("Yes, it is.");
+                    	String ans = "Yes, it is.";
+                        System.out.println(ans);
+                        ansList.add(ans);
                     }
                 }
             }
@@ -166,13 +185,33 @@ public class BackwardRuleBaseSystem {
                         s = s.replaceAll(patSubject.toString(), "");
                         s = s.replaceAll("-" + patObject.toString(), "");
                         s = s.replaceAll(" ", "");
-                        System.out.println(patSubject + " " + s + " " + patObject + ".");
-                    } else {
-//                        System.out.println("Not Exists");
+                        String ans = patSubject + " " + s + " " + patObject + ".";
+                        System.out.println(ans);
+                        ansList.add(ans);
                     }
                 }
             }
         }
+        } else {
+        	if (mode == 1) {
+        		String ans = "I don't know.";
+        		System.out.println(ans);
+        		ansList.add(ans);
+        	} else if (mode == 2) {
+        		String ans = "No, it hasn't.";
+        		System.out.println(ans);
+        		ansList.add(ans);
+        	} else if (mode == 3) {
+        		String ans = "No, it isn't.";
+        		System.out.println(ans);
+        		ansList.add(ans);
+        	} else if (mode == 4) {
+        		String ans = "I don't know.";
+        		System.out.println(ans);
+        		ansList.add(ans);
+        	}
+        }
+	return ansList;
     }
 
     public static void makegraph() {
