@@ -120,15 +120,22 @@ public class BackwardRuleBaseSystem {
         	if (mode == 1) {
         		String subject = hypothesis.substring(8); // 主語を取得
 //            	System.out.println(subject);
+		boolean result = false;
         		for (String s : theFired) {
         			if (!s.substring(s.indexOf(" is ") + 1).equals(hypothesis.substring(hypothesis.indexOf(" is ") + 1))) { // theFiredの末尾にはhypothesisが入っている
         				if (s.contains(" is ")) { // ~ is ~ という形式のアサーションのみ出力
+					result = true;
         					String ans = subject + s.substring(s.indexOf(" is "));
         					System.out.println(ans);
         					ansList.add(ans);
         				}
         			}	
         		}
+			if (!result) {
+					String ans = "I don't know.";
+					System.out.println(ans);
+					ansList.add(ans);
+				}
 //            if (theFired.contains(que)) {
 //                System.out.println("Exists");
 //            } else {
@@ -139,6 +146,7 @@ public class BackwardRuleBaseSystem {
 //            System.out.println(patSubject);
             Pattern patObject = Pattern.compile(que.substring(que.indexOf("has") + 4));
 //            System.out.println(patObject);
+		boolean result = false;
             for (String s : theFired) {
                 Matcher matSubject = patSubject.matcher(s);
                 if (matSubject.find()) {
@@ -146,17 +154,24 @@ public class BackwardRuleBaseSystem {
                     Matcher matObject = patObject.matcher(s);
                     if (matObject.find()) {
 //                        System.out.println("Exists");
+		result = true;
                     	String ans = "Yes, it has.";
                     	System.out.println(ans);
                         ansList.add(ans);
                     }
                 }
             }
+	    if (!result) {
+					String ans = "No, it hasn't.";
+					System.out.println(ans);
+					ansList.add(ans);
+				}
         } else if (mode == 3) {
             Pattern patSubject = Pattern.compile(que.substring(0, que.indexOf("is") + 3));
 //            System.out.println(patSubject);
             Pattern patObject = Pattern.compile(que.substring(que.indexOf("is") + 4));
 //            System.out.println(patObject);
+		boolean result = false;
             for (String s : theFired) {
                 Matcher matSubject = patSubject.matcher(s);
                 if (matSubject.find()) {
@@ -164,17 +179,24 @@ public class BackwardRuleBaseSystem {
                     Matcher matObject = patObject.matcher(s);
                     if (matObject.find()) {
 //                        System.out.println("Exists");
+			result = true;
                     	String ans = "Yes, it is.";
                         System.out.println(ans);
                         ansList.add(ans);
                     }
                 }
             }
+	    if (!result) {
+					String ans = "No, it isn't.";
+					System.out.println(ans);
+					ansList.add(ans);
+				}
         } else if (mode == 4) {
             Pattern patSubject = Pattern.compile(que.substring(0, que.indexOf("has") + 3));
 //            System.out.println(patSubject);
             Pattern patObject = Pattern.compile(que.substring(que.indexOf("has") + 4));
 //            System.out.println(patObject);
+		boolean result = false;
             for (String s : theFired) {
                 Matcher matSubject = patSubject.matcher(s);
                 if (matSubject.find()) {
@@ -182,6 +204,7 @@ public class BackwardRuleBaseSystem {
                     Matcher matObject = patObject.matcher(s);
                     if (matObject.find()) {
 //                        System.out.println("Exists");
+			result = true;
                         s = s.replaceAll(patSubject.toString(), "");
                         s = s.replaceAll("-" + patObject.toString(), "");
                         s = s.replaceAll(" ", "");
@@ -191,6 +214,11 @@ public class BackwardRuleBaseSystem {
                     }
                 }
             }
+	    if (!result) {
+					String ans = "I don't know.";
+					System.out.println(ans);
+					ansList.add(ans);
+				}
         }
         } else {
         	if (mode == 1) {
