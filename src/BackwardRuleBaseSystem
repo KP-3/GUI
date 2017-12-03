@@ -218,11 +218,11 @@ public class BackwardRuleBaseSystem {
 
         GraphViz gv = new GraphViz();
         gv.addln(gv.start_graph());
-        ArrayList<String> l = RuleBase.graph;
+        ArrayList<String> l = BRuleBase.graph;
         for (String l1 : l) {
             gv.addln(l1);
         }
-        ArrayList<String> list = RuleBase.graph1;
+        ArrayList<String> list = BRuleBase.graph1;
         for (String l2 : list) {
             gv.addln(l2);
         }
@@ -399,7 +399,7 @@ class BRuleBase implements Serializable {
         if (cPoint < wm.size()) {
             // WME(Working Memory Elements) と Unify してみる．
             for (int i = cPoint; i < wm.size(); i++) {
-                if ((new Unifier()).unify(thePattern, (String) wm.get(i), theBinding)) {
+                if ((new BUnifier()).unify(thePattern, (String) wm.get(i), theBinding)) {
                     System.out.println("Success WM");
                     System.out.println((String) wm.get(i) + " <=> " + thePattern);
                     theFired.add(wm.get(i)); // 発火したアサーションを追加
@@ -441,7 +441,7 @@ class BRuleBase implements Serializable {
                     orgBinding.put(key, value);
                 }
                 ArrayList<String> orgFired = theFired; // 元のtheFiredを取っておく
-                if ((new Unifier()).unify(thePattern, (String) aRule.getConsequent(), theBinding)) {
+                if ((new BUnifier()).unify(thePattern, (String) aRule.getConsequent(), theBinding)) {
                     System.out.println("Success RULE");
                     System.out.println("Rule:" + aRule + " <=> " + thePattern);
                     ArrayList<String> antecedents = aRule.getAntecedents();
