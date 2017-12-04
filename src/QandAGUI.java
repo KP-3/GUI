@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class QandAGUI extends JFrame implements ActionListener{
     ArrayList<String> rulelist = new ArrayList<String>();
@@ -48,19 +50,19 @@ public class QandAGUI extends JFrame implements ActionListener{
         gbc1.weighty = 40;
         JPanel P2 = new JPanel();
 
-        //P2.setBackground(Color.blue);
+        
         gbc1.fill = GridBagConstraints.BOTH;
         layout.setConstraints(P2,gbc1);
         add(P2);
         gbc1.gridy = 1;
         gbc1.weighty = 10;
         JPanel P3 = new JPanel();
-        //P3.setBackground(Color.ORANGE);
+        
         layout.setConstraints(P3,gbc1);
         add(P3);
         JPanel P4 = new JPanel();
         P4.setLayout(new BorderLayout());
-        //P4.setBackground(Color.GREEN);
+        
         gbc1.gridy=2;
         gbc1.weighty=70;
         layout.setConstraints(P4,gbc1);
@@ -180,9 +182,11 @@ public class QandAGUI extends JFrame implements ActionListener{
         ScrollPane scr2 = new ScrollPane();
         scr.add(answer);
         scr2.add(Img);
+        
         P4.add(after,BorderLayout.NORTH);
         P4.add(scr2,BorderLayout.CENTER);
         P4.add(scr, BorderLayout.SOUTH);
+        
         dialog.add(error,BorderLayout.NORTH);
         dialog.add(ok,BorderLayout.CENTER);
         dialog.setVisible(false);
@@ -236,6 +240,7 @@ public class QandAGUI extends JFrame implements ActionListener{
                     String assertion = asfilename.getText();
                     String que = query.getText();
                     String filename = assertion + "-after.txt";
+                    if(que.equals("What is this?")){
                     ArrayList<String> ans = RuleBaseSystem.question(assertion,rule,que,filename);
                     RuleBaseSystem.makegraph();
                     ImageIcon icon = new ImageIcon("./forward.png");
@@ -246,6 +251,52 @@ public class QandAGUI extends JFrame implements ActionListener{
                     	answer.append(s+"\n");
                     }
                     after.setText(filename+"に推論後のワーキングメモリを保存しました。");
+                    }else{
+                    	Pattern pat1 = Pattern.compile("What is [a-z]*");
+                        Matcher mat1 = pat1.matcher(que);
+                        Pattern pat2 = Pattern.compile("Does [a-zA-Z]* have [a-z]*");
+                        Matcher mat2 = pat2.matcher(que);
+                        Pattern pat3 = Pattern.compile("Is [a-zA-Z]* [a-z]*");
+                        Matcher mat3 = pat3.matcher(que);
+                        Pattern pat4 = Pattern.compile("How many [a-z]* does [a-zA-Z]* have");
+                        Matcher mat4 = pat4.matcher(que);
+                        String hypothesis = null;
+                        String subject = null;
+                        String object = null;
+                        int mode = 0;
+                        if (mat1.find()) { // What is ~ ? ifのアサーションを全て出力
+                            subject = que.substring(8, que.length() - 2);
+                            hypothesis = "?x is " + subject;
+                            mode = 1;
+                        } else if (mat2.find()) { // Does ~ have ~ ?
+                            subject = que.substring(5, que.indexOf("have") - 1);
+                            hypothesis = "?x is a " + subject;
+                            object = que.substring(que.indexOf("have") + 5);
+                            que = " has " + object;
+                            mode = 2;
+                        } else if (mat3.find()) { // Is ~ ~ ?
+                            subject = que.substring(3).substring(0, que.substring(3).indexOf(" "));
+                            hypothesis = "?x is a " + subject;
+                            object = que.substring(3).substring(que.substring(3).indexOf(" "));
+                            que = " is a" + object;
+                            mode = 3;
+                        } else if (mat4.find()) { // How many ~ does ~ have ?
+                            subject = que.substring(que.indexOf("does") + 5, que.indexOf("have") - 1);
+                            hypothesis = "?x is a " + subject;
+                            object = que.substring(9, que.indexOf("does") - 1);
+                            que = " has " + object;
+                            mode = 4;
+                        }
+                        ArrayList<String> ans = BackwardRuleBaseSystem.backward(assertion, rule, hypothesis, que, mode);
+                        BackwardRuleBaseSystem.makegraph();
+                        ImageIcon icon = new ImageIcon("./back1.png");
+                        Image small = icon.getImage().getScaledInstance((int)(icon.getIconWidth()*0.7), (int)(icon.getIconHeight()*0.5), Image.SCALE_SMOOTH);
+                        ImageIcon smallIcon = new ImageIcon(small);
+                        Img.setIcon(smallIcon);
+                        for(String s: ans){
+                        	answer.append(s+"\n");
+                        }
+                    }
         }else if(event.getSource() == ok){
             dialog.setVisible(false);
         }else if(event.getSource() == assave){
